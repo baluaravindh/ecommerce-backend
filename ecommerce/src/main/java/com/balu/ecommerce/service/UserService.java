@@ -5,6 +5,7 @@ import com.balu.ecommerce.dto.RegisterRequestDTO;
 import com.balu.ecommerce.dto.UserResponseDTO;
 import com.balu.ecommerce.entity.User;
 import com.balu.ecommerce.exception.DuplicateEmailException;
+import com.balu.ecommerce.exception.InvalidCredentialsException;
 import com.balu.ecommerce.exception.ResourceNotFoundException;
 import com.balu.ecommerce.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -42,7 +43,7 @@ public class UserService {
                 .orElseThrow(() -> new ResourceNotFoundException("No account found with email: " + dto.getEmail()));
         // Compare raw password with encrypted password
         if (!passwordEncoder.matches(dto.getPassword(), user.getPassword())) {
-            throw new RuntimeException("Invalid Password");
+            throw new InvalidCredentialsException("Invalid Password");
         }
         return mapToDto(user);
     }
