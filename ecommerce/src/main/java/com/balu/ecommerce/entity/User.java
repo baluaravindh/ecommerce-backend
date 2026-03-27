@@ -6,6 +6,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "users")
@@ -48,4 +50,8 @@ public class User {
         CUSTOMER,
         ADMIN
     }
+
+    // @OneToMany on User → "I have many addresses"
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Address> addresses = new ArrayList<>();
 }
