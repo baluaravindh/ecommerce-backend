@@ -1,6 +1,7 @@
 package com.balu.ecommerce.service;
 
 import com.balu.ecommerce.dto.LoginRequestDTO;
+import com.balu.ecommerce.dto.LoginResponseDTO;
 import com.balu.ecommerce.dto.RegisterRequestDTO;
 import com.balu.ecommerce.dto.UserResponseDTO;
 import com.balu.ecommerce.entity.User;
@@ -8,6 +9,7 @@ import com.balu.ecommerce.exception.DuplicateEmailException;
 import com.balu.ecommerce.exception.InvalidCredentialsException;
 import com.balu.ecommerce.exception.ResourceNotFoundException;
 import com.balu.ecommerce.repository.UserRepository;
+import com.balu.ecommerce.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -17,6 +19,7 @@ import org.springframework.stereotype.Service;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final JwtUtil jwtUtil;
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     // REGISTER
@@ -38,14 +41,27 @@ public class UserService {
     }
 
     // LOGIN (Basic — JWT will replace this in Phase 2)
-    public UserResponseDTO login(LoginRequestDTO dto) {
+    // UPDATE login method — change return type to LoginResponseDTO
+    public LoginResponseDTO login(LoginRequestDTO dto) {
         User user = userRepository.findByEmail(dto.getEmail())
                 .orElseThrow(() -> new ResourceNotFoundException("No account found with email: " + dto.getEmail()));
+
         // Compare raw password with encrypted password
         if (!passwordEncoder.matches(dto.getPassword(), user.getPassword())) {
             throw new InvalidCredentialsException("Invalid Password");
         }
-        return mapToDto(user);
+
+        // Generate JWT token
+        String token = jwtUtil.generateToken(user.getEmail(), user.getRole().name());
+
+        return new LoginResponseDTO(
+                user.getId(),
+                user.getFullName(),
+                user.getEmail(),
+                user.getRole().name(),
+                token,
+                "Bearer"
+        );
     }
 
     // MAPPER

@@ -1,6 +1,7 @@
 package com.balu.ecommerce.controller;
 
 import com.balu.ecommerce.dto.LoginRequestDTO;
+import com.balu.ecommerce.dto.LoginResponseDTO;
 import com.balu.ecommerce.dto.RegisterRequestDTO;
 import com.balu.ecommerce.dto.UserResponseDTO;
 import com.balu.ecommerce.service.UserService;
@@ -28,8 +29,8 @@ public class UserController {
 
     // POST /api/users/login
     @PostMapping("/login")
-    public ResponseEntity<UserResponseDTO> login(@Valid @RequestBody LoginRequestDTO dto) {
-        UserResponseDTO userResponseDTO = userService.login(dto);
+    public ResponseEntity<LoginResponseDTO> login(@Valid @RequestBody LoginRequestDTO dto) {
+        LoginResponseDTO userResponseDTO = userService.login(dto);
         return ResponseEntity.ok(userResponseDTO);
     }
 }
