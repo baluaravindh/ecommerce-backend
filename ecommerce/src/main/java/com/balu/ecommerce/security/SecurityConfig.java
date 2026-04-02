@@ -1,4 +1,4 @@
-package com.balu.ecommerce.util;
+package com.balu.ecommerce.security;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;

@@ -9,7 +9,7 @@ import com.balu.ecommerce.exception.DuplicateEmailException;
 import com.balu.ecommerce.exception.InvalidCredentialsException;
 import com.balu.ecommerce.exception.ResourceNotFoundException;
 import com.balu.ecommerce.repository.UserRepository;
-import com.balu.ecommerce.util.JwtUtil;
+import com.balu.ecommerce.security.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;

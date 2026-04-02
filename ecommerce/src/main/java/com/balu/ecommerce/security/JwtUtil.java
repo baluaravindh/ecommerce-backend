@@ -1,4 +1,4 @@
-package com.balu.ecommerce.util;
+package com.balu.ecommerce.security;
 
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.*;
