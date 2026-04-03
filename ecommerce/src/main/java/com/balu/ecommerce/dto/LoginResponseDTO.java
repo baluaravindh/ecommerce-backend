@@ -15,4 +15,5 @@ public class LoginResponseDTO {
     private String role;
     private String token; // ← JWT token
     private String tokenType; // ← always "Bearer"
+    private String refreshToken; // ← ADD THIS
 }

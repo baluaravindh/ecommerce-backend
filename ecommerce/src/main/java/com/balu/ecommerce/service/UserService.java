@@ -4,6 +4,7 @@ import com.balu.ecommerce.dto.LoginRequestDTO;
 import com.balu.ecommerce.dto.LoginResponseDTO;
 import com.balu.ecommerce.dto.RegisterRequestDTO;
 import com.balu.ecommerce.dto.UserResponseDTO;
+import com.balu.ecommerce.entity.RefreshToken;
 import com.balu.ecommerce.entity.User;
 import com.balu.ecommerce.exception.DuplicateEmailException;
 import com.balu.ecommerce.exception.InvalidCredentialsException;
@@ -20,6 +21,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final JwtUtil jwtUtil;
+    private final RefreshTokenService refreshTokenService;
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     // REGISTER
@@ -52,16 +54,20 @@ public class UserService {
         }
 
         // Generate JWT token
-        String token = jwtUtil.generateToken(user.getEmail(), user.getRole().name());
+        String accessToken = jwtUtil.generateToken(user.getEmail(), user.getRole().name());
+
+        // Generate refresh token
+        RefreshToken refreshToken = refreshTokenService.createRefreshToken(user.getId());
 
         return new LoginResponseDTO(
                 user.getId(),
                 user.getFullName(),
                 user.getEmail(),
                 user.getRole().name(),
-                token,
-                "Bearer"
-        );
+                accessToken,
+                "Bearer",
+                refreshToken.getToken()
+                );
     }
 
     // MAPPER

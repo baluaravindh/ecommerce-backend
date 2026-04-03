@@ -28,6 +28,8 @@ public class SecurityConfig {
                         // PUBLIC endpoints — no token needed
                         .requestMatchers("/api/users/register").permitAll()
                         .requestMatchers("/api/users/login").permitAll()
+                        .requestMatchers("api/users/refresh").permitAll()
+                        .requestMatchers("/api/users/logout").permitAll()
 
                         // ADMIN only
                         .requestMatchers(HttpMethod.DELETE, "/api/products/**").hasRole("ADMIN")
