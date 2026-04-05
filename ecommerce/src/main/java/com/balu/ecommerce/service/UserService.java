@@ -1,9 +1,6 @@
 package com.balu.ecommerce.service;
 
-import com.balu.ecommerce.dto.LoginRequestDTO;
-import com.balu.ecommerce.dto.LoginResponseDTO;
-import com.balu.ecommerce.dto.RegisterRequestDTO;
-import com.balu.ecommerce.dto.UserResponseDTO;
+import com.balu.ecommerce.dto.*;
 import com.balu.ecommerce.entity.RefreshToken;
 import com.balu.ecommerce.entity.User;
 import com.balu.ecommerce.exception.DuplicateEmailException;
@@ -67,7 +64,36 @@ public class UserService {
                 accessToken,
                 "Bearer",
                 refreshToken.getToken()
-                );
+        );
+    }
+
+    public void changePassword(String email, ChangePasswordRequestDTO dto) {
+
+        // Step 1: Find user by email (extracted from JWT)
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("No account found with email: " + email));
+
+        // Step 2: Verify current password is correct
+        if (!passwordEncoder.matches(dto.getCurrentPassword(), user.getPassword())) {
+            throw new RuntimeException("Current Password is incorrect");
+        }
+
+        // Step 3: Check new password and confirm password match
+        if (!dto.getNewPassword().equals(dto.getConfirmNewPassword())) {
+            throw new RuntimeException("New password and confirm password do not match");
+        }
+
+        // Step 4: Check new password is different from current
+        if (passwordEncoder.matches(dto.getNewPassword(), user.getPassword())) {
+            throw new RuntimeException("New password must be different from current password");
+        }
+
+        // Step 5: Encode and save new password
+        user.setPassword(passwordEncoder.encode(dto.getNewPassword()));
+        userRepository.save(user);
+
+        // Step 6: Invalidate all refresh tokens — force re-login on all devices
+        refreshTokenService.deleteAllUserTokens(user.getId());
     }
 
     // MAPPER

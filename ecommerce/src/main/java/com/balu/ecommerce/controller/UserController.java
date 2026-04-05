@@ -10,6 +10,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -72,5 +74,20 @@ public class UserController {
     public ResponseEntity<String> logout(@Valid @RequestBody RefreshTokenRequestDTO dto) {
         refreshTokenService.revokeRefreshToken(dto.getRefreshToken());
         return ResponseEntity.ok("Logged out successfully");
+    }
+
+    // POST /api/users/change-password
+    @PostMapping("/change-password")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<String> changePassword(@Valid @RequestBody ChangePasswordRequestDTO dto) {
+        // Get logged-in user's email from Security Context
+        // This was set by JwtFilter when it validated the token
+        String email = SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getName(); // getName() returns the email we set as subject in JWT
+
+        userService.changePassword(email, dto);
+
+        return ResponseEntity.ok("Password changed successfully. Please login again.");
     }
 }
