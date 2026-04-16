@@ -1,6 +1,8 @@
 package com.balu.ecommerce.controller;
 
+import com.balu.ecommerce.dto.PagedResponseDTO;
 import com.balu.ecommerce.dto.ProductDto;
+import com.balu.ecommerce.dto.ProductFilterDTO;
 import com.balu.ecommerce.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -59,5 +61,12 @@ public class ProductController {
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<ProductDto>> getAllProductsByCategory(@PathVariable String category) {
         return ResponseEntity.ok(productService.getProductsByCategory(category));
+    }
+
+    @GetMapping("/search")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<PagedResponseDTO<ProductDto>> searchProducts(
+            @ModelAttribute ProductFilterDTO filter){
+        return ResponseEntity.ok(productService.getFilteredProductDto(filter));
     }
 }

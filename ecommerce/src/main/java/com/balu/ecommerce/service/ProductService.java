@@ -1,10 +1,18 @@
 package com.balu.ecommerce.service;
 
+import com.balu.ecommerce.dto.PagedResponseDTO;
 import com.balu.ecommerce.dto.ProductDto;
+import com.balu.ecommerce.dto.ProductFilterDTO;
 import com.balu.ecommerce.entity.Product;
 import com.balu.ecommerce.exception.ResourceNotFoundException;
 import com.balu.ecommerce.repository.ProductRepository;
+import com.balu.ecommerce.specification.ProductSpecification;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -68,6 +76,42 @@ public class ProductService {
                 .collect(Collectors.toList());
     }
 
+    public PagedResponseDTO<ProductDto> getFilteredProductDto(ProductFilterDTO filter) {
+
+        // Step 1: Build sort direction
+        Sort.Direction sortDirection = filter.getDirection().equalsIgnoreCase("desc")
+                ? Sort.Direction.DESC
+                : Sort.Direction.ASC;
+
+        // Step 2: Build Pageable — page number + page size + sort
+        Pageable pageable = PageRequest.of(
+                filter.getPage(),
+                filter.getSize(),
+                Sort.by(sortDirection, filter.getSortBy()));
+
+        // Step 3: Build Specification (dynamic filter conditions)
+        Specification<Product> spec = ProductSpecification.buildFilter(filter);
+
+        // Step 4: Execute — Spring writes the SQL for us instead manually
+        Page<Product> productPage = productRepository.findAll(spec, pageable);
+
+        // Step 5: Map results to DTO
+        List<ProductDto> content = productPage.getContent()
+                .stream()
+                .map(this::mapToDto)
+                .collect(Collectors.toList());
+
+        // Step 6: Build and return paged response
+        return new PagedResponseDTO<>(
+                content,
+                productPage.getNumber(),
+                productPage.getSize(),
+                productPage.getTotalElements(),
+                productPage.getTotalPages(),
+                productPage.isLast()
+        );
+    }
+
     // ---Mapper Methods---
     private ProductDto mapToDto(Product product) {
         ProductDto dto = new ProductDto();
@@ -80,6 +124,7 @@ public class ProductService {
         dto.setImageUrl(product.getImageUrl());
         return dto;
     }
+
 
     private Product mapToEntity(ProductDto dto) {
         Product product = new Product();
